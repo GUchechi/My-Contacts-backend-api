@@ -51,16 +51,22 @@ const updateContact = asyncHandler(async (req, res) => {
     throw new Error("Contact not found");
   }
 
-  if (contact.uset_id.toString() !== req.user.id) {
+  if (contact.user_id.toString() !== req.user.id) {
     res.status(403);
     throw new Error(
       "User don't have permission to update another user's contact"
     );
   }
 
+  const { name, email, phone } = req.body;
+  if (!name || !email || !phone) {
+    res.status(400);
+    throw new Error("All fields are mandatory");
+  }
+
   const updatedContact = await Contact.findByIdAndUpdate(
     req.params.id,
-    req.body,
+    { name, email, phone }, // Update only the fields you want to change
     { new: true }
   );
   res.status(200).json(updatedContact);
@@ -76,7 +82,7 @@ const deleteContact = asyncHandler(async (req, res) => {
     throw new Error("Contact not found");
   }
 
-  if (contact.uset_id.toString() !== req.user.id) {
+  if (contact.user_id.toString() !== req.user.id) {
     res.status(403);
     throw new Error(
       "User don't have permission to delete another user's contact"
